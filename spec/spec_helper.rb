@@ -17,6 +17,20 @@ RSpec.configure do |config|
   config.formatter = :documentation
   config.order = :defined
 
+  config.before(:suite) do
+    ActiveRecord::Base.establish_connection(
+      adapter:  "postgresql",
+      host:     ENV.fetch("PG_HOST", "localhost"),
+      port:     ENV.fetch("PG_PORT", 5432),
+      database: ENV.fetch("PG_DATABASE", "test_db"),
+      username: ENV.fetch("PG_USER", "test_user"),
+      password: ENV.fetch("PG_PASSWORD", "test_password")
+    )
+  end
+
+  config.after(:suite) do
+    ActiveRecord::Base.connection.disconnect!
+  end
 
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
