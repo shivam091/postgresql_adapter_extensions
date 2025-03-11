@@ -10,6 +10,8 @@ SimpleCov.start
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "postgresql_adapter_extensions"
 
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |file| require file }
+
 RSpec.configure do |config|
   config.color = true
   config.formatter = :documentation
@@ -25,4 +27,7 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  # Include support classes and modules.
+  config.include MigrationHelpers
 end
