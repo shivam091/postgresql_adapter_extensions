@@ -1,0 +1,42 @@
+name: Ruby
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }}
+    env:
+      RAILS_ENV: test
+      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      DATABASE_URL: "postgres://rails:password@localhost:5432/rails_test"
+    strategy:
+      matrix:
+        ruby:
+          - "3.3.7"
+    services:
+      postgres:
+        image: postgres:11-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: rails_test
+          POSTGRES_USER: rails
+          POSTGRES_PASSWORD: password
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install prerequisites
+      run: |
+        sudo apt-get install -yqq libpq-dev
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - name: Run the default task
+      run: bundle exec rake
+    - name: Publish code coverage
+      uses: paambaati/codeclimate-action@v9.0.0
