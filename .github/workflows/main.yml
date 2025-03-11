@@ -31,6 +31,8 @@ jobs:
     - name: Install prerequisites
       run: |
         sudo apt-get install -yqq libpq-dev
+    - name: Run Bash script
+      run: bash ./bin/setup_postgresql.sh
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
