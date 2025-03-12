@@ -53,27 +53,76 @@ create_sequence(name, options = {})
 
 **Create a sequence with default options:**
 
- ```ruby
- create_sequence(:order_id_seq)
- ```
+```ruby
+create_sequence(:order_id_seq)
+```
 
 **Create a sequence starting from 1000 with an increment of 5:**
 
- ```ruby
- create_sequence(:order_id_seq, start: 1000, increment_by: 5)
- ```
+```ruby
+create_sequence(:order_id_seq, start: 1000, increment_by: 5)
+```
 
 **Create a cyclic sequence with a maximum value of 5000:**
 
- ```ruby
- create_sequence(:order_id_seq, cycle: true, maxvalue: 5000)
- ```
+```ruby
+create_sequence(:order_id_seq, cycle: true, maxvalue: 5000)
+```
 
 **Create a sequence owned by a specific table and column:**
 
- ```ruby
- create_sequence(:order_id_seq, owned_by: "orders.id")
- ```
+```ruby
+create_sequence(:order_id_seq, owned_by: "orders.id")
+```
+
+### alter_sequence
+
+The `alter_sequence` method allows you to modify an existing sequence in your PostgreSQL database.
+You can change various attributes of the sequence, such as its increment, start value, maximum value,
+cycle behavior, and ownership.
+
+```ruby
+alter_sequence(name, options = {})
+```
+
+**Modify the increment value of a sequence:**
+
+```ruby
+alter_sequence(:order_id_seq, increment_by: 10)
+```
+
+**Restart a sequence at a specific value:**
+
+```ruby
+alter_sequence(:order_id_seq, restart_with: 2000)
+```
+
+**Set a minimum and maximum value for a sequence:**
+
+```ruby
+alter_sequence(:order_id_seq, minvalue: 500, maxvalue: 10000)
+```
+
+**Make a sequence cycle when it reaches the maximum value:**
+
+```ruby
+alter_sequence(:order_id_seq, cycle: true)
+```
+
+**Remove the cycle behavior from a sequence:**
+
+```ruby
+alter_sequence(:order_id_seq, cycle: false)
+```
+
+**Change the owner of a sequence to a specific table column:**
+
+```ruby
+alter_sequence(:order_id_seq, owned_by: "orders.id")
+```
+
+This method provides flexibility in managing sequences dynamically in your Rails application,
+ ensuring that sequence-related database behavior can be modified as needed.
 
 ### drop_sequence
 
