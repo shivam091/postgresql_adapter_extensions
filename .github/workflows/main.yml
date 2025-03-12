@@ -9,8 +9,6 @@ jobs:
     name: Ruby ${{ matrix.ruby }}
     env:
       RAILS_ENV: test
-      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-      DATABASE_URL: "postgres://rails:password@localhost:5432/rails_test"
     strategy:
       matrix:
         ruby:
@@ -21,9 +19,7 @@ jobs:
         ports:
           - "5432:5432"
         env:
-          POSTGRES_DB: rails_test
-          POSTGRES_USER: rails
-          POSTGRES_PASSWORD: password
+          DATABASE_URL: "postgres://rails:password@localhost:5432/rails_test"
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
     - name: Checkout code
@@ -40,3 +36,5 @@ jobs:
       run: bundle exec rake
     - name: Publish code coverage
       uses: paambaati/codeclimate-action@v9.0.0
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
