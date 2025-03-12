@@ -22,9 +22,9 @@ RSpec.configure do |config|
       adapter:  "postgresql",
       host:     ENV.fetch("PG_HOST", "localhost"),
       port:     ENV.fetch("PG_PORT", 5432),
-      database: ENV.fetch("PG_DATABASE", "test_db"),
-      username: ENV.fetch("PG_USER", "test_user"),
-      password: ENV.fetch("PG_PASSWORD", "test_password")
+      database: ENV.fetch("PG_DATABASE", "rails_test"),
+      username: ENV.fetch("PG_USER", "rails"),
+      password: ENV.fetch("PG_PASSWORD", "password")
     )
   end
 
