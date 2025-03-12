@@ -2,7 +2,8 @@
 # -*- frozen_string_literal: true -*-
 # -*- warn_indent: true -*-
 
-module PostgreSQLAdapterExtensions
-  # Current stable version.
-  VERSION = "1.0.0"
+module MigrationHelpers
+  def connection
+    ActiveRecord::Base.connection
+  end
 end
