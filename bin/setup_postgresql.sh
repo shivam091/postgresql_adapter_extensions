@@ -6,49 +6,36 @@ set -e
 echo "🔧 Setting up PostgreSQL for testing..."
 
 # Read input from arguments or prompt the user
-PG_DATABASE=${1:-}
-PG_USER=${2:-}
-PG_PASSWORD=${3:-}
-
-if [[ -z "$PG_DATABASE" ]]; then
-  read -p "Enter PostgreSQL database name: " PG_DATABASE
-fi
-
-if [[ -z "$PG_USER" ]]; then
-  read -p "Enter PostgreSQL username: " PG_USER
-fi
-
-if [[ -z "$PG_PASSWORD" ]]; then
-  read -s -p "Enter PostgreSQL password: " PG_PASSWORD
-  echo ""
-fi
+POSTGRES_DB=${POSTGRES_DB:-"test_db"}
+POSTGRES_USER=${POSTGRES_USER:-"test_user"}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-"test_password"}
 
 # Check if the user exists, create if not
-echo "👤 Checking if user '$PG_USER' exists..."
-USER_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$PG_USER'")
+echo "👤 Checking if user '$POSTGRES_USER' exists..."
+USER_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$POSTGRES_USER'")
 
 if [[ "$USER_EXISTS" != "1" ]]; then
-  echo "👤 Creating user '$PG_USER'..."
-  sudo -u postgres psql -c "CREATE USER $PG_USER WITH SUPERUSER;"
-  echo "🔑 Setting password for user '$PG_USER'..."
-  sudo -u postgres psql -c "ALTER USER $PG_USER WITH PASSWORD '$PG_PASSWORD';"
+  echo "👤 Creating user '$POSTGRES_USER'..."
+  sudo -u postgres psql -c "CREATE USER $POSTGRES_USER WITH SUPERUSER;"
+  echo "🔑 Setting password for user '$POSTGRES_USER'..."
+  sudo -u postgres psql -c "ALTER USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';"
 else
-  echo "✅ User '$PG_USER' already exists."
+  echo "✅ User '$POSTGRES_USER' already exists."
 fi
 
 # Check if the database exists, create if not
-echo "📦 Checking if database '$PG_DATABASE' exists..."
-DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$PG_DATABASE'")
+echo "📦 Checking if database '$POSTGRES_DB' exists..."
+DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$POSTGRES_DB'")
 
 if [[ "$DB_EXISTS" != "1" ]]; then
-  echo "📦 Creating database '$PG_DATABASE'..."
-  sudo -u postgres psql -c "CREATE DATABASE $PG_DATABASE OWNER $PG_USER;"
+  echo "📦 Creating database '$POSTGRES_DB'..."
+  sudo -u postgres psql -c "CREATE DATABASE $POSTGRES_DB OWNER $POSTGRES_USER;"
 else
-  echo "✅ Database '$PG_DATABASE' already exists."
+  echo "✅ Database '$POSTGRES_DB' already exists."
 fi
 
 # Grant privileges to the user on the database
-echo "🔑 Granting privileges to '$PG_USER' on '$PG_DATABASE'..."
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $PG_DATABASE TO $PG_USER;"
+echo "🔑 Granting privileges to '$POSTGRES_USER' on '$POSTGRES_DB'..."
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB TO $POSTGRES_USER;"
 
 echo "✅ PostgreSQL setup complete!"
