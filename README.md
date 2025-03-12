@@ -41,6 +41,72 @@ Or otherwise simply install it yourself as:
 
 `$ gem install postgresql_adapter_extensions`
 
+## Usage
+
+### create_sequence
+
+The `create_sequence` method allows you to create a new sequence in your PostgreSQL database with customizable options. A sequence is typically used to auto-generate unique values for primary keys or other incrementing columns.
+
+```ruby
+create_sequence(name, options = {})
+```
+
+**Create a sequence with default options:**
+
+ ```ruby
+ create_sequence(:order_id_seq)
+ ```
+
+**Create a sequence starting from 1000 with an increment of 5:**
+
+ ```ruby
+ create_sequence(:order_id_seq, start: 1000, increment_by: 5)
+ ```
+
+**Create a cyclic sequence with a maximum value of 5000:**
+
+ ```ruby
+ create_sequence(:order_id_seq, cycle: true, maxvalue: 5000)
+ ```
+
+**Create a sequence owned by a specific table and column:**
+
+ ```ruby
+ create_sequence(:order_id_seq, owned_by: "orders.id")
+ ```
+
+### drop_sequence
+
+The `drop_sequence` method allows you to drop an existing sequence from your PostgreSQL database, with options to control its behavior.
+
+```ruby
+drop_sequence(name, options = {})
+```
+
+**Drop a sequence without additional options:**
+
+ ```ruby
+drop_sequence(:order_id_seq)
+```
+
+**Drop a sequence if it exists:**
+
+```ruby
+drop_sequence(:order_id_seq, if_exists: true)
+```
+
+**Drop a sequence and all dependent objects:**
+
+```ruby
+drop_sequence(:order_id_seq, drop_behavior: :cascade)
+```
+
+**Drop a sequence but prevent deletion if dependencies exist:**
+
+```ruby
+drop_sequence(:order_id_seq, drop_behavior: :restrict)
+```
+
 ## PostgreSQL Setup for Contributors
 
 If you're contributing to this gem and need to set up PostgreSQL for local development or testing,
