@@ -51,10 +51,9 @@ module PostgreSQLAdapterExtensions
       options = options.reverse_merge(
         start: 1,
         increment_by: 1,
+        minvalue: 1,
         cache: 1,
         cycle: false,
-        data_type: nil,
-        owned_by: nil,
         if_not_exists: false
       )
 
@@ -164,13 +163,13 @@ module PostgreSQLAdapterExtensions
     #
     def drop_sequence(name, options = {})
       options = options.reverse_merge(
-        if_exists: false,
-        drop_behavior: :restrict,
+        if_exists: false
       )
 
       sql = +"DROP SEQUENCE"
       sql << " IF EXISTS" if options[:if_exists]
       sql << " #{quote_table_name(name)}"
+
       sql << " #{options[:drop_behavior].to_s.upcase}" if options[:drop_behavior].in?([:cascade, :restrict])
 
       execute(sql).tap { reload_type_map }
