@@ -62,6 +62,65 @@ module PostgreSQLAdapterExtensions
       execute(sql).tap { reload_type_map }
     end
 
+    # Alters an existing PostgreSQL sequence with the given options.
+    #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.0.0
+    #
+    # @param name [String, Symbol] The name of the sequence to alter.
+    # @param options [Hash] A hash of options to modify the sequence behavior.
+    # @option options [Boolean] :if_exists Includes `IF EXISTS` to avoid errors if the sequence does not exist.
+    # @option options [String, nil] :data_type Sets the sequence's data type (e.g., `BIGINT`, `SMALLINT`).
+    # @option options [Integer] :increment_by Sets the increment step for the sequence.
+    # @option options [Integer, nil] :minvalue Sets the minimum value for the sequence. Uses `NO MINVALUE` if nil.
+    # @option options [Integer, nil] :maxvalue Sets the maximum value for the sequence. Uses `NO MAXVALUE` if nil.
+    # @option options [Integer] :start Sets the starting value of the sequence.
+    # @option options [Integer, nil] :restart Restarts the sequence. Uses `RESTART` if nil, `RESTART WITH value` if provided.
+    # @option options [Integer] :cache Sets the number of sequence values to cache for performance.
+    # @option options [Boolean] :cycle Enables (`CYCLE`) or disables (`NO CYCLE`) sequence cycling.
+    # @option options [String, nil] :owned_by Associates the sequence with a table column. Uses `OWNED BY NONE` if nil.
+    #
+    # @example Modify the increment value of a sequence
+    #   alter_sequence(:order_id_seq, increment_by: 10)
+    #
+    # @example Restart a sequence at a specific value
+    #   alter_sequence(:order_id_seq, restart_with: 2000)
+    #
+    # @example Set a minimum and maximum value for a sequence
+    #   alter_sequence(:order_id_seq, minvalue: 500, maxvalue: 10000)
+    #
+    # @example Make a sequence cycle when it reaches the maximum value
+    #   alter_sequence(:order_id_seq, cycle: true)
+    #
+    # @example Remove the cycle behavior from a sequence
+    #   alter_sequence(:order_id_seq, cycle: false)
+    #
+    # @example Change the owner of a sequence to a specific table column
+    #   alter_sequence(:order_id_seq, owned_by: "orders.id")
+    #
+    # @return [void] Executes the SQL statement to alter the sequence.
+    #
+    # @note Uses `ALTER SEQUENCE` SQL statement with PostgreSQL-specific options.
+    #
+    def alter_sequence(name, options = {})
+      sql = +"ALTER SEQUENCE"
+      sql << " IF EXISTS" if options[:if_exists]
+      sql << " #{quote_table_name(name)}"
+
+      sql << " AS #{options[:data_type]}" if options[:data_type]
+      sql << " INCREMENT BY #{options[:increment_by]}" if options[:increment_by]
+      sql << (options[:minvalue] ? " MINVALUE #{options[:minvalue]}" : " NO MINVALUE")
+      sql << (options[:maxvalue] ? " MAXVALUE #{options[:maxvalue]}" : " NO MAXVALUE")
+      sql << " START WITH #{options[:start]}" if options[:start]
+      sql << " RESTART" if options[:restart].nil? && options.key?(:restart)
+      sql << " RESTART WITH #{options[:restart]}" if options[:restart]
+      sql << " CACHE #{options[:cache]}" if options[:cache]
+      sql << (options[:cycle] ? " CYCLE" : " NO CYCLE")
+      sql << (options[:owned_by] ? " OWNED BY #{options[:owned_by]}" : " OWNED BY NONE")
+
+      execute(sql).tap { reload_type_map }
+    end
+
     ##
     # Drops an existing sequence from the PostgreSQL database with optional conditions.
     #
