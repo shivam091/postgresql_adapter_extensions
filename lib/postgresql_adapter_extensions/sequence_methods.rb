@@ -62,5 +62,44 @@ module PostgreSQLAdapterExtensions
       execute(sql).tap { reload_type_map }
     end
 
+    ##
+    # Drops an existing sequence from the PostgreSQL database with optional conditions.
+    #
+    # @param name [String, Symbol] The name of the sequence to drop.
+    # @param options [Hash] Additional options to modify the behavior of the drop operation.
+    # @option options [Boolean] :if_exists (false) Adds `IF EXISTS` to avoid errors if the sequence does not exist.
+    # @option options [Symbol] :drop_behavior (`nil`) Determines whether dependent objects are also dropped.
+    #   - Accepts `:cascade` to drop dependent objects.
+    #   - Accepts `:restrict` to prevent dropping if dependencies exist.
+    #
+    # @example Drop a sequence without additional options
+    #   drop_sequence(:order_id_seq)
+    #
+    # @example Drop a sequence if it exists
+    #   drop_sequence(:order_id_seq, if_exists: true)
+    #
+    # @example Drop a sequence and all dependent objects
+    #   drop_sequence(:order_id_seq, drop_behavior: :cascade)
+    #
+    # @example Drop a sequence but prevent deletion if dependencies exist
+    #   drop_sequence(:order_id_seq, drop_behavior: :restrict)
+    #
+    # @return [void]
+    #
+    # @note Uses `DROP SEQUENCE` SQL statement with PostgreSQL-specific options.
+    #
+    def drop_sequence(name, options = {})
+      options = options.reverse_merge(
+        if_exists: false,
+        drop_behavior: :restrict,
+      )
+
+      sql = +"DROP SEQUENCE"
+      sql << " IF EXISTS" if options[:if_exists]
+      sql << " #{quote_table_name(name)}"
+      sql << " #{options[:drop_behavior].to_s.upcase}" if options[:drop_behavior].in?([:cascade, :restrict])
+
+      execute(sql).tap { reload_type_map }
+    end
   end
 end
