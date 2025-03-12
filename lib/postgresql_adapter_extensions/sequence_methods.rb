@@ -3,18 +3,30 @@
 # -*- warn_indent: true -*-
 
 module PostgreSQLAdapterExtensions
+  ##
+  # This module provides methods for managing PostgreSQL sequences, including
+  # creating, altering, and dropping sequences with various customization options.
+  #
+  # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+  # @since 1.0.0
+  #
+  # @note This module is designed for PostgreSQL databases and may not be compatible with other database systems.
+  #
   module SequenceMethods
     ##
     # Creates a new sequence in the PostgreSQL database with customizable options.
     #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.0.0
+    #
     # @param name [String, Symbol] The name of the sequence to create.
     # @param options [Hash] Additional options to configure the sequence.
+    # @option options [Boolean] :if_not_exists (false) Includes `IF NOT EXISTS` to avoid errors if the sequence exists.
+    # @option options [String, nil] :data_type (nil) Sets the sequence's data type (e.g., `BIGINT`, `SMALLINT`).
     # @option options [Integer] :start (1) The starting value of the sequence.
     # @option options [Integer] :increment_by (1) The increment step for each sequence value.
-    # @option options [Integer, nil] :minvalue (1) The minimum value the sequence can generate.
-    #   - If `nil`, `NO MINVALUE` is used in the query.
-    # @option options [Integer, nil] :maxvalue (nil) The maximum value the sequence can generate.
-    #   - If `nil`, `NO MAXVALUE` is used in the query.
+    # @option options [Integer, nil] :minvalue (1) The minimum value the sequence can generate. Uses `NO MINVALUE` if nil.
+    # @option options [Integer, nil] :maxvalue (nil) The maximum value the sequence can generate. Uses `NO MAXVALUE` if nil.
     # @option options [Integer] :cache (1) The number of sequence values to cache for performance.
     # @option options [Boolean] :cycle (false) Whether the sequence should cycle back to the start after reaching the max value.
     # @option options [String, nil] :owned_by (nil) The table and column name that owns this sequence.
@@ -123,6 +135,9 @@ module PostgreSQLAdapterExtensions
 
     ##
     # Drops an existing sequence from the PostgreSQL database with optional conditions.
+    #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.0.0
     #
     # @param name [String, Symbol] The name of the sequence to drop.
     # @param options [Hash] Additional options to modify the behavior of the drop operation.
