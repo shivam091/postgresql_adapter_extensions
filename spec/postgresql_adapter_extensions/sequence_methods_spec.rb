@@ -14,7 +14,7 @@ RSpec.describe PostgreSQLAdapterExtensions::SequenceMethods do
 
   describe "#create_sequence" do
     context "when creating a sequence without options" do
-      it "creates a sequence successfully with default values" do
+      it "creates a sequence with default values" do
         connection.create_sequence(:order_id_seq)
 
         expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(1)
@@ -82,7 +82,7 @@ RSpec.describe PostgreSQLAdapterExtensions::SequenceMethods do
     context "when creating a sequence with 'cycle' option" do
       context "when using 'cycle: true'" do
         it "creates a sequence with cycle enabled" do
-          connection.create_sequence(:order_id_seq, cycle: true)
+          connection.create_sequence(:order_id_seq, maxvalue: 2, cycle: true)
 
           cycle_flag = connection.select_value(<<-SQL)
             SELECT cycle FROM pg_sequences
@@ -90,6 +90,9 @@ RSpec.describe PostgreSQLAdapterExtensions::SequenceMethods do
           SQL
 
           expect(cycle_flag).to be_truthy
+          expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(1)
+          expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(2)
+          expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(1)
         end
       end
 
@@ -143,11 +146,194 @@ RSpec.describe PostgreSQLAdapterExtensions::SequenceMethods do
     end
   end
 
+  describe "#alter_sequence" do
+    before { connection.create_sequence(:order_id_seq, start: 50) }
+
+    context "when altering a sequence with 'increment_by' option" do
+      it "updates the incremental value" do
+        connection.alter_sequence(:order_id_seq, increment_by: 10)
+
+        expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(50)
+        expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(60)
+      end
+    end
+
+    context "when altering a sequence with 'minvalue' option" do
+      it "updates the minvalue" do
+        connection.alter_sequence(:order_id_seq, minvalue: 40)
+
+        minvalue = connection.select_value(<<-SQL)
+          SELECT min_value FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        expect(minvalue).to eq(40)
+      end
+
+      it "removes the minvalue when set to 'nil'" do
+        connection.alter_sequence(:order_id_seq, minvalue: nil)
+
+        minvalue = connection.select_value(<<-SQL)
+          SELECT min_value FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        expect(minvalue).to eq(1)
+      end
+    end
+
+    context "when altering a sequence with 'maxvalue' option" do
+      it "updates the maxvalue" do
+        connection.alter_sequence(:order_id_seq, maxvalue: 5000)
+
+        maxvalue = connection.select_value(<<-SQL)
+          SELECT max_value FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        expect(maxvalue).to eq(5000)
+      end
+
+      it "removes the maxvalue when set to 'nil'" do
+        connection.alter_sequence(:order_id_seq, maxvalue: nil)
+
+        maxvalue = connection.select_value(<<-SQL)
+          SELECT max_value FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        expect(maxvalue).to eq(9223372036854775807)
+      end
+    end
+
+    context "when altering a sequence with 'restart' option" do
+      it "restarts the sequence at the new value" do
+        connection.alter_sequence(:order_id_seq, restart: 3000)
+
+        expect(connection.select_value("SELECT nextval('order_id_seq')")).to eq(3000)
+      end
+    end
+
+    context "when altering a sequence with 'cache' option" do
+      it "updates the cache size" do
+        connection.alter_sequence(:order_id_seq, cache: 20)
+
+        cache_size = connection.select_value(<<-SQL)
+          SELECT cache_size FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        expect(cache_size).to eq(20)
+      end
+    end
+
+    context "when altering a sequence with 'cycle' option" do
+      context "when using 'cycle: true'" do
+        it "enables cycle" do
+          connection.alter_sequence(:order_id_seq, cycle: true)
+
+          cycle_flag = connection.select_value(<<-SQL)
+            SELECT cycle FROM pg_sequences
+            WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+          SQL
+
+          expect(cycle_flag).to be_truthy
+        end
+      end
+
+      context "when using 'cycle: false'" do
+        it "disables cycle" do
+          connection.alter_sequence(:order_id_seq, cycle: false)
+
+          cycle_flag = connection.select_value(<<-SQL)
+            SELECT cycle FROM pg_sequences
+            WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+          SQL
+
+          expect(cycle_flag).to be_falsy
+        end
+      end
+    end
+
+    context "when altering a sequence with 'owned_by' option" do
+      before do
+        connection.create_table(:orders) do |t|
+          t.integer :order_number
+        end
+      end
+
+      it "assigns ownership to a table column" do
+        connection.alter_sequence(:order_id_seq, owned_by: "orders.order_number")
+
+        owned_by = connection.select_value(<<-SQL)
+          SELECT pg_get_serial_sequence('orders', 'order_number')
+        SQL
+
+        expect(owned_by).to include("order_id_seq")
+      end
+
+      it "removes ownership when set to 'nil'" do
+        connection.alter_sequence(:order_id_seq, owned_by: nil)
+
+        owned_by = connection.select_value(<<-SQL)
+          SELECT pg_get_serial_sequence('orders', 'order_number')
+        SQL
+
+        expect(owned_by).to be_nil
+      end
+    end
+
+    context "when altering multiple sequence attributes" do
+      it "updates incremental value, minvalue, and maxvalue" do
+        connection.alter_sequence(:order_id_seq, increment_by: 5, minvalue: 5, maxvalue: 5000)
+
+        increment = connection.select_value(<<-SQL)
+          SELECT increment_by FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        minvalue = connection.select_value(<<-SQL)
+          SELECT min_value FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        maxvalue = connection.select_value(<<-SQL)
+          SELECT max_value FROM pg_sequences
+          WHERE schemaname = 'public' AND sequencename = 'order_id_seq'
+        SQL
+
+        expect(increment).to eq(5)
+        expect(minvalue).to eq(5)
+        expect(maxvalue).to eq(5000)
+      end
+    end
+
+    context "when altering a non-existent sequence with 'if_exists' option" do
+      it "does not raise an error if sequence does not exist" do
+        connection.drop_sequence(:order_id_seq, if_exists: true)
+
+        expect {
+          connection.alter_sequence(:order_id_seq, if_exists: true, increment: 10)
+        }.not_to raise_error
+      end
+    end
+
+    context "when altering a non-existent sequence without 'if_exists' option" do
+      it "raises an error" do
+        connection.drop_sequence(:order_id_seq, if_exists: true)
+
+        expect {
+          connection.alter_sequence(:order_id_seq, increment: 10)
+        }.to raise_error(ActiveRecord::StatementInvalid)
+      end
+    end
+  end
+
   describe "#drop_sequence" do
     before { connection.create_sequence(:order_id_seq, start: 1000) }
 
     context "when dropping a sequence without options" do
-      it "drops the sequence successfully with default values" do
+      it "drops the sequence with default values" do
         connection.drop_sequence(:order_id_seq)
 
         expect {
