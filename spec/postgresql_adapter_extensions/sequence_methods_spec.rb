@@ -138,7 +138,7 @@ RSpec.describe PostgreSQLAdapterExtensions::SequenceMethods do
           SELECT pg_get_serial_sequence('orders', 'id')
         SQL
 
-        expect(owned_by).to eq("public.orders_id_seq")
+        expect(owned_by).to eq("public.order_id_seq")
       end
     end
   end

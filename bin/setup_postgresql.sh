@@ -6,9 +6,9 @@ set -e
 echo "🔧 Setting up PostgreSQL for testing..."
 
 # Read input from arguments or prompt the user
-POSTGRES_DB=${POSTGRES_DB:-"test_db"}
-POSTGRES_USER=${POSTGRES_USER:-"test_user"}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-"test_password"}
+POSTGRES_DB=${POSTGRES_DB:-"rails_test"}
+POSTGRES_USER=${POSTGRES_USER:-"rails"}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-"password"}
 
 # Check if the user exists, create if not
 echo "👤 Checking if user '$POSTGRES_USER' exists..."
