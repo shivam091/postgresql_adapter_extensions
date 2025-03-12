@@ -5,7 +5,10 @@
 ENV["RAILS_ENV"] ||= "test"
 
 require "simplecov"
+require "simplecov_json_formatter"
+
 SimpleCov.start
+SimpleCov.formatter = SimpleCov::Formatter::JSONFormatter
 
 $:.unshift File.expand_path("../../lib", __FILE__)
 require "postgresql_adapter_extensions"
