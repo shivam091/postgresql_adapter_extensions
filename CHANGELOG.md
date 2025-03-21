@@ -1,3 +1,19 @@
+## [1.1.0](https://github.com/shivam091/postgresql_adapter_extensions/compare/v1.0.0...v1.1.0) - 2025-03-21
+
+### What's new
+- Extended `ActiveRecord::Migration::CommandRecorder` to support PostgreSQL sequence-related commands.
+- Added `create_sequence` method to record sequence creation in migrations.
+- Added `alter_sequence` method to record sequence alterations (irreversible).
+- Added `drop_sequence` method to record sequence deletions (irreversible).
+- Implemented `invert_create_sequence` to allow rollback by dropping the sequence.
+- Implemented `invert_alter_sequence` and `invert_drop_sequence` to raise `ActiveRecord::IrreversibleMigration`.
+
+### Notes
+- `create_sequence` can be reversed by dropping the sequence.
+- `alter_sequence` and `drop_sequence` are irreversible operations.
+
+----------
+
 ## [1.0.0](https://github.com/shivam091/postgresql_adapter_extensions/compare/v0.1.0...v1.0.0) - 2025-03-12
 
 ### What's new
