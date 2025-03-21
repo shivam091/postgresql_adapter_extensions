@@ -7,17 +7,14 @@ module PostgreSQLAdapterExtensions
   # This module provides methods for managing PostgreSQL sequences, including
   # creating, altering, and dropping sequences with various customization options.
   #
+  # @note This module is designed for PostgreSQL databases and may not be compatible with other database systems.
+  #
   # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
   # @since 1.0.0
-  #
-  # @note This module is designed for PostgreSQL databases and may not be compatible with other database systems.
   #
   module SequenceMethods
     ##
     # Creates a new sequence in the PostgreSQL database with customizable options.
-    #
-    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
-    # @since 1.0.0
     #
     # @param name [String, Symbol] The name of the sequence to create.
     # @param options [Hash] Additional options to configure the sequence.
@@ -47,6 +44,9 @@ module PostgreSQLAdapterExtensions
     #
     # @note Uses `CREATE SEQUENCE` SQL statement with PostgreSQL-specific options.
     #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.0.0
+    #
     def create_sequence(name, options = {})
       options = options.reverse_merge(
         start: 1,
@@ -73,10 +73,8 @@ module PostgreSQLAdapterExtensions
       execute(sql).tap { reload_type_map }
     end
 
+    ##
     # Alters an existing PostgreSQL sequence with the given options.
-    #
-    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
-    # @since 1.0.0
     #
     # @param name [String, Symbol] The name of the sequence to alter.
     # @param options [Hash] A hash of options to modify the sequence behavior.
@@ -113,6 +111,9 @@ module PostgreSQLAdapterExtensions
     #
     # @note Uses `ALTER SEQUENCE` SQL statement with PostgreSQL-specific options.
     #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.0.0
+    #
     def alter_sequence(name, options = {})
       sql = +"ALTER SEQUENCE"
       sql << " IF EXISTS" if options[:if_exists]
@@ -134,9 +135,6 @@ module PostgreSQLAdapterExtensions
 
     ##
     # Drops an existing sequence from the PostgreSQL database with optional conditions.
-    #
-    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
-    # @since 1.0.0
     #
     # @param name [String, Symbol] The name of the sequence to drop.
     # @param options [Hash] Additional options to modify the behavior of the drop operation.
@@ -160,6 +158,9 @@ module PostgreSQLAdapterExtensions
     # @return [void]
     #
     # @note Uses `DROP SEQUENCE` SQL statement with PostgreSQL-specific options.
+    #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.0.0
     #
     def drop_sequence(name, options = {})
       options = options.reverse_merge(

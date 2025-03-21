@@ -5,6 +5,7 @@
 require "active_record"
 require "active_record/connection_adapters/postgresql_adapter"
 
+require "postgresql_adapter_extensions/command_recorder"
 require "postgresql_adapter_extensions/sequence_methods"
 
 module PostgreSQLAdapterExtensions
@@ -20,4 +21,7 @@ module PostgreSQLAdapterExtensions
     ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.include(SequenceMethods)
   end
 
+  if defined?(ActiveRecord::Migration::CommandRecorder)
+    ActiveRecord::Migration::CommandRecorder.include(CommandRecorder)
+  end
 end
