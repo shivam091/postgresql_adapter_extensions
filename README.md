@@ -121,8 +121,8 @@ alter_sequence(:order_id_seq, cycle: false)
 alter_sequence(:order_id_seq, owned_by: "orders.id")
 ```
 
-This method provides flexibility in managing sequences dynamically in your Rails application,
- ensuring that sequence-related database behavior can be modified as needed.
+This method provides flexibility in managing sequences dynamically in your Rails
+application, ensuring that sequence-related database behavior can be modified as needed.
 
 ### drop_sequence
 
@@ -154,6 +154,26 @@ drop_sequence(:order_id_seq, drop_behavior: :cascade)
 
 ```ruby
 drop_sequence(:order_id_seq, drop_behavior: :restrict)
+```
+
+### rename_sequence
+
+The `rename_sequence` method allows you to rename an existing sequence in your PostgreSQL database.
+
+```ruby
+rename_sequence(name, options = {})
+```
+
+**Rename a sequence:**
+
+```ruby
+rename_sequence(:order_id_seq, to: :new_order_id_seq)
+```
+
+**Rename a sequence only if it exists:**
+
+```ruby
+rename_sequence(:order_id_seq, to: :new_order_id_seq, if_exists: true)
 ```
 
 ## PostgreSQL Setup for Contributors
