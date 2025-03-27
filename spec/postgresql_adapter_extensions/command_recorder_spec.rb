@@ -57,6 +57,20 @@ RSpec.describe PostgreSQLAdapterExtensions::CommandRecorder do
     end
   end
 
+  describe "#rename_sequence" do
+    it "records rename_sequence command" do
+      recorder.rename_sequence(:test_seq, to: :new_test_seq)
+
+      expect(recorder.commands).to include([:rename_sequence, [:test_seq, {to: :new_test_seq}], nil])
+    end
+
+    it "records rename_sequence with if_exists option" do
+      recorder.drop_sequence(:test_seq, to: :new_test_seq, if_exists: true)
+
+      expect(recorder.commands).to include([:drop_sequence, [:test_seq, {to: :new_test_seq, if_exists: true}], nil])
+    end
+  end
+
   describe "#invert_create_sequence" do
     it "returns drop_sequence as inverse of create_sequence" do
       expect(recorder.send(:invert_create_sequence, ["test_seq"])).to eq([:drop_sequence, ["test_seq"]])
@@ -76,6 +90,12 @@ RSpec.describe PostgreSQLAdapterExtensions::CommandRecorder do
       expect {
         recorder.send(:invert_drop_sequence, ["test_seq"])
       }.to raise_error(ActiveRecord::IrreversibleMigration)
+    end
+  end
+
+  describe "#invert_rename_sequence" do
+    it "returns rename_sequence as inverse of rename_sequence" do
+      expect(recorder.send(:invert_rename_sequence, [:test_seq, to: :new_test_seq])).to eq([:rename_sequence, [:new_test_seq, to: :test_seq]])
     end
   end
 
