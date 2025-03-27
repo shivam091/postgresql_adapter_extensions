@@ -77,6 +77,23 @@ module PostgreSQLAdapterExtensions
       record(:drop_sequence, args, &block)
     end
 
+    ##
+    # Records the renaming of a PostgreSQL sequence during a migration.
+    #
+    # This method is invoked when renaming a sequence in the database.
+    # The corresponding inverse operation will be to rename the sequence back to
+    # its original name during rollback.
+    #
+    # @param args [Array] Arguments required to rename the sequence (usually the old and new sequence names).
+    #
+    # @return [void]
+    #
+    # @since 1.2.0
+    #
+    def rename_sequence(*args)
+      record(:rename_sequence, args)
+    end
+
     private
 
     ##
@@ -116,6 +133,20 @@ module PostgreSQLAdapterExtensions
     #
     def invert_drop_sequence(args)
       raise ActiveRecord::IrreversibleMigration, "Drop sequence is irreversible."
+    end
+
+    ##
+    # Generates the inverse command for renaming a sequence, which renames it
+    # back to its original name.
+    #
+    # @param args [Array] Arguments passed to the rename_sequence method (old sequence name and new sequence name).
+    #
+    # @return [Array] An array with the inverse command `:rename_sequence` and its arguments swapped.
+    #
+    # @since 1.2.0
+    #
+    def invert_rename_sequence(args)
+      [:rename_sequence, [args.last[:to], to: args.first]]
     end
   end
 end

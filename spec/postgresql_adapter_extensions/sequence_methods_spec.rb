@@ -406,6 +406,48 @@ RSpec.describe PostgreSQLAdapterExtensions::SequenceMethods do
     end
   end
 
+  describe "#rename_sequence" do
+    before { connection.create_sequence(:order_id_seq) }
+
+    context "when renaming a sequence" do
+      after { connection.drop_sequence(:new_order_id_seq, if_exists: true) }
+
+      it "renames the sequence successfully" do
+        expect {
+          connection.rename_sequence(:order_id_seq, to: :new_order_id_seq)
+        }.to change {
+          connection.select_value("SELECT relname FROM pg_class WHERE relkind = 'S' AND relname = 'new_order_id_seq'")
+        }.from(nil).to("new_order_id_seq")
+
+        expect(connection.select_value("SELECT nextval('new_order_id_seq')")).to eq(1)
+      end
+    end
+
+    context "when renaming a non-existent sequence with 'if_exists' option" do
+      it "does not raise an error if the sequence does not exist" do
+        expect {
+          connection.rename_sequence(:non_existent_sequence, to: :new_sequence, if_exists: true)
+        }.not_to raise_error
+      end
+    end
+
+    context "when renaming a non-existent sequence without 'if_exists' option" do
+      it "raises an error" do
+        expect {
+          connection.rename_sequence(:non_existent_sequence, to: :new_sequence)
+        }.to raise_error(ActiveRecord::StatementInvalid)
+      end
+    end
+
+    context "when :to option is missing" do
+      it "raises an ArgumentError" do
+        expect {
+          connection.rename_sequence(:order_id_seq)
+        }.to raise_error(ArgumentError, ":to is required")
+      end
+    end
+  end
+
   describe "edge cases" do
     it "handles dropping and recreating the same sequence" do
       connection.create_sequence(:order_id_seq, start: 500)
