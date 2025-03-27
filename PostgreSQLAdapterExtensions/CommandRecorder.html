@@ -236,6 +236,30 @@
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#rename_sequence-instance_method" title="#rename_sequence (instance method)">#<strong>rename_sequence</strong>(*args)  &#x21d2; void </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>Records the renaming of a PostgreSQL sequence during a migration.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
   
 
@@ -614,12 +638,91 @@
 </table>
 </div>
     
+      <div class="method_details ">
+  <h3 class="signature " id="rename_sequence-instance_method">
+  
+    #<strong>rename_sequence</strong>(*args)  &#x21d2; <tt>void</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p>
+<p>Records the renaming of a PostgreSQL sequence during a migration.</p>
+
+<p>This method is invoked when renaming a sequence in the database. The corresponding inverse operation will be to rename the sequence back to its original name during rollback.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>args</span>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Arguments required to rename the sequence (usually the old and new sequence names).</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Since:</p>
+<ul class="since">
+  
+    <li>
+      
+      
+      
+      
+        
+        <div class='inline'>
+<p>1.2.0</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+93
+94
+95</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/postgresql_adapter_extensions/command_recorder.rb', line 93</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_rename_sequence'>rename_sequence</span><span class='lparen'>(</span><span class='op'>*</span><span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_record'>record</span><span class='lparen'>(</span><span class='symbol'>:rename_sequence</span><span class='comma'>,</span> <span class='id identifier rubyid_args'>args</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
   </div>
 
 </div>
 
       <div id="footer">
-  Generated on Fri Mar 21 06:17:13 2025 by
+  Generated on Thu Mar 27 10:18:36 2025 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.37 (ruby-3.3.7).
 </div>
