@@ -175,5 +175,43 @@ module PostgreSQLAdapterExtensions
 
       execute(sql).tap { reload_type_map }
     end
+
+    ##
+    # Renames an existing PostgreSQL sequence.
+    #
+    # @param name [String, Symbol] The current name of the sequence.
+    # @param options [Hash] A hash of options for renaming the sequence.
+    # @option options [Boolean] :if_exists (false) Includes +IF EXISTS+ to avoid errors if the sequence does not exist.
+    # @option options [String, Symbol] :to The new name for the sequence.
+    #
+    # @raise [ArgumentError] If the +:to+ option is not provided.
+    #
+    # @example Rename a sequence
+    #   rename_sequence(:order_id_seq, to: :new_order_id_seq)
+    #
+    # @example Rename a sequence only if it exists
+    #   rename_sequence(:order_id_seq, to: :new_order_id_seq, if_exists: true)
+    #
+    # @return [void]
+    #
+    # @note Uses `ALTER SEQUENCE ... RENAME TO` SQL statement in PostgreSQL.
+    #
+    # @author {Harshal V. Ladhe}[https://shivam091.github.io/]
+    # @since 1.2.0
+    #
+    def rename_sequence(name, options = {})
+      to = options.fetch(:to) { raise ArgumentError, ":to is required" }
+
+      options = options.reverse_merge(
+        if_exists: false
+      )
+
+      sql = +"ALTER SEQUENCE"
+      sql << " IF EXISTS" if options[:if_exists]
+      sql << " #{quote_table_name(name)}"
+      sql << " RENAME TO #{quote_table_name(to)}"
+
+      execute(sql).tap { reload_type_map }
+    end
   end
 end
